@@ -3,161 +3,295 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Hueman — Finance Dashboard</title>
+<title>Hueman Finance</title>
+<meta name="theme-color" content="#0e1726" />
+<link rel="manifest" href='data:application/manifest+json,{"name":"Hueman Finance","short_name":"Hueman","start_url":".","display":"standalone","background_color":"%23F2F2F7","theme_color":"%230e1726","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 rx=%2242%22 fill=%22%230e1726%22/%3E%3Ctext x=%2296%22 y=%22128%22 font-size=%22104%22 fill=%22%23c9962e%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22%3EH%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
 <style>
-:root{
-  --bg:#F2F2F7;--card:#fff;--label:#1C1C1E;--label2:#8E8E93;--sep:rgba(60,60,67,.10);
-  --blue:#007AFF;--red:#FF3B30;--green:#34C759;--orange:#FF9500;--gray:#8E8E93;
-}
+:root{--bg:#F2F2F7;--card:#fff;--label:#1C1C1E;--label2:#8E8E93;--sep:rgba(60,60,67,.10);
+--blue:#007AFF;--red:#FF3B30;--green:#34C759;--orange:#FF9500;--gray:#8E8E93;--gold:#c9962e;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;background:var(--bg);color:var(--label);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;}
-#app{max-width:640px;margin:0 auto;padding:24px 16px 80px;}
-.h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:4px 2px 2px;}
-.sub{color:var(--label2);font-size:13px;margin:0 2px 18px;}
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;}
+::-webkit-scrollbar{display:none;}
+#app{max-width:640px;margin:0 auto;padding:22px 16px 90px;}
+.h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:2px 2px 2px;}
+.sub{color:var(--label2);font-size:13px;margin:0 2px 16px;}
 .card{background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);margin-bottom:14px;}
-.p5{padding:20px;}.p4{padding:16px;}
+.p5{padding:20px;}.p4{padding:16px;}.p0{padding:0;overflow:hidden;}
 .upph{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label2);}
-.big{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:6px 0;font-variant-numeric:tabular-nums;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.big{font-size:38px;font-weight:700;letter-spacing:-.03em;margin:6px 0;font-variant-numeric:tabular-nums;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 .tile{background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);padding:16px;}
 .tile .t{font-size:13px;font-weight:500;color:var(--label2);}
-.tile .v{font-size:24px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;}
+.tile .v{font-size:23px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;}
 .tile .s{font-size:12px;color:var(--label2);margin-top:2px;}
-.bar{height:10px;border-radius:8px;background:#EFEFF4;overflow:hidden;display:flex;}
+.bar{height:10px;border-radius:8px;background:#EFEFF4;overflow:hidden;display:flex;margin:12px 0 0;}
 .bar>i{display:block;height:100%;}
-.legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--label2);flex-wrap:wrap;}
+.legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--label2);flex-wrap:wrap;}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
-.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:.5px solid var(--sep);font-variant-numeric:tabular-nums;}
-.row:first-child{border-top:none;}
-.btn{padding:10px 16px;border:none;border-radius:12px;font-size:15px;font-weight:600;color:#fff;background:var(--blue);cursor:pointer;font-family:inherit;}
-.btn:active{opacity:.7;}
+.row{display:flex;align-items:center;gap:10px;padding:13px 16px;width:100%;border:none;background:none;font-family:inherit;text-align:left;cursor:pointer;font-variant-numeric:tabular-nums;}
+.row+.row{border-top:.5px solid var(--sep);}
+.grow{flex:1;min-width:0;}.trunc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.seg{display:flex;padding:2px;border-radius:11px;background:#E9E9EB;margin-bottom:14px;overflow:auto;}
+.seg button{flex:1;white-space:nowrap;padding:7px 10px;border:none;background:none;border-radius:9px;font-size:13px;font-weight:500;color:var(--label2);font-family:inherit;cursor:pointer;}
+.seg button.on{background:#fff;color:var(--label);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12);}
+.chev{color:#C7C7CC;flex:none;}
 .muted{color:var(--label2);}
 .err{background:#fff3f2;border:1px solid #ffd5d2;color:#b3261e;border-radius:14px;padding:16px;font-size:14px;line-height:1.5;}
-.spin{width:26px;height:26px;border:3px solid #e5e5ea;border-top-color:var(--blue);border-radius:50%;animation:r 1s linear infinite;margin:30px auto;}
+.note{background:#FFF8E8;border:1px solid #F2E2B8;color:#7a5b00;border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.45;margin-bottom:14px;}
+.spin{width:26px;height:26px;border:3px solid #e5e5ea;border-top-color:var(--blue);border-radius:50%;animation:r 1s linear infinite;margin:40px auto;}
 @keyframes r{to{transform:rotate(360deg)}}
-.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EFEFF4;color:var(--label2);}
+.back{background:none;border:none;color:var(--blue);font-size:16px;font-family:inherit;cursor:pointer;padding:0;margin-bottom:8px;display:inline-flex;gap:4px;align-items:center;}
+.tab{position:fixed;left:0;right:0;bottom:0;background:rgba(249,249,249,.88);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);z-index:50;}
+.tabin{max-width:640px;margin:0 auto;display:flex;padding-bottom:env(safe-area-inset-bottom);}
+.tabin button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;background:none;border:none;color:#999A9E;font-family:inherit;cursor:pointer;font-size:10px;font-weight:500;}
+.tabin button.on{color:var(--blue);}
+.datey{display:flex;gap:8px;margin-bottom:14px;}
+.datey input{flex:1;padding:9px 12px;border:1px solid var(--sep);border-radius:11px;font-size:14px;font-family:inherit;background:#fff;}
+svg{display:block;}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="h1">Finance</div>
-  <div class="sub" id="asof">Loading your live Tally data…</div>
-  <div id="content"><div class="spin"></div></div>
-</div>
-
+<div id="app"><div class="spin"></div></div>
+<nav class="tab"><div class="tabin" id="tabbar"></div></nav>
 <script>
 "use strict";
-// ---- Supabase connection ----
-var SUPABASE_URL = "https://qqkufmmjsvomdqioxvkg.supabase.co";
-var SUPABASE_KEY = "sb_publishable_PAAtoU88WPBxRg8591aK_w_reblOaRc";
+var SUPABASE_URL="https://qqkufmmjsvomdqioxvkg.supabase.co";
+var SUPABASE_KEY="sb_publishable_PAAtoU88WPBxRg8591aK_w_reblOaRc";
 
 function api(path){
-  return fetch(SUPABASE_URL + "/rest/v1/" + path, {
-    headers:{ apikey:SUPABASE_KEY, Authorization:"Bearer "+SUPABASE_KEY }
-  }).then(function(r){
-    if(!r.ok) return r.text().then(function(t){ throw new Error("HTTP "+r.status+": "+t.slice(0,200)); });
-    return r.json();
+  return fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){throw new Error("HTTP "+r.status+": "+t.slice(0,160));}); return r.json(); });
+}
+function fetchAll(path){
+  var all=[],from=0,page=1000;
+  function more(){
+    return api(path+(path.indexOf("?")>=0?"&":"?")+"limit="+page+"&offset="+from).then(function(rows){
+      all=all.concat(rows); if(rows.length<page||from>30000) return all; from+=page; return more();
+    });
+  }
+  return more();
+}
+
+function inr(n){var v=Math.abs(Number(n)||0),s=(Number(n)||0)<0?"-":"";
+  if(v>=1e7)return s+"₹"+(v/1e7).toFixed(2)+" Cr"; if(v>=1e5)return s+"₹"+(v/1e5).toFixed(2)+" L";
+  return s+"₹"+Math.round(v).toLocaleString("en-IN");}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+var MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(s){
+  if(!s)return null; s=String(s).trim();
+  var m=s.match(/^(\d{4})(\d{2})(\d{2})$/); if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/); if(m){var y=+m[3];if(y<100)y+=2000;var mo=MON[m[2].toLowerCase()];if(mo!=null)return new Date(y,mo,+m[1]);}
+  return null;
+}
+function dlabel(d){return d?d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"2-digit"}):"—";}
+
+// ---- state ----
+var DATA={bills:[],vouchers:[],ledgers:[],trial:[],sales:[],lastSync:null};
+var ui={tab:"home",period:"month",custFrom:"",custTo:"",openCust:null};
+
+function load(){
+  document.getElementById("app").innerHTML='<div class="spin"></div>';
+  Promise.all([
+    fetchAll("outstanding_bills?select=party_type,party,amount,bill_date,due_date,overdue_days"),
+    fetchAll("vouchers?select=vch_type,date,party,amount,narration"),
+    fetchAll("tally_ledgers?select=name,parent_group"),
+    fetchAll("trial_balance?select=ledger,closing_dr,closing_cr"),
+    fetchAll("sales_lines?select=date_iso,customer,item,description,qty,unit,rate,amount,voucher_no").catch(function(){return [];}),
+    api("sync_log?select=ran_at,status&order=ran_at.desc&limit=1").catch(function(){return [];})
+  ]).then(function(res){
+    DATA.bills=res[0]||[]; DATA.vouchers=res[1]||[]; DATA.ledgers=res[2]||[];
+    DATA.trial=res[3]||[]; DATA.sales=res[4]||[];
+    DATA.lastSync=(res[5]&&res[5][0])?res[5][0].ran_at:null;
+    render();
+  }).catch(function(e){
+    document.getElementById("app").innerHTML='<div class="h1">Finance</div><div class="err"><b>Could not read your data.</b><br>'+esc(e.message||e)+'</div>';
   });
 }
 
-function inr(n){
-  var v=Math.abs(Number(n)||0), s=(Number(n)||0)<0?"-":"";
-  if(v>=1e7) return s+"₹"+(v/1e7).toFixed(2)+" Cr";
-  if(v>=1e5) return s+"₹"+(v/1e5).toFixed(2)+" L";
-  return s+"₹"+Math.round(v).toLocaleString("en-IN");
+// ---- period helpers ----
+function periodRange(){
+  var now=new Date(), y=now.getFullYear(), mo=now.getMonth();
+  if(ui.period==="month") return [new Date(y,mo,1), now];
+  if(ui.period==="quarter"){ var qs=Math.floor(mo/3)*3; return [new Date(y,qs,1), now]; }
+  if(ui.period==="6m"){ return [new Date(y,mo-5,1), now]; }
+  if(ui.period==="year"){ var fy=(mo>=3)?y:y-1; return [new Date(fy,3,1), new Date(fy+1,2,31,23,59)]; }
+  if(ui.period==="custom"){
+    var f=ui.custFrom?new Date(ui.custFrom):new Date(y,mo,1);
+    var t=ui.custTo?new Date(ui.custTo+"T23:59"):now; return [f,t];
+  }
+  return [new Date(y,mo,1), now];
 }
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
-
-// Parse Tally date like "1-Apr-26" -> JS Date
-var MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-function tallyDate(s){
-  if(!s) return null;
-  var m=String(s).match(/(\d{1,2})-([A-Za-z]{3})-(\d{2,4})/);
-  if(!m) return null;
-  var d=+m[1], mo=MON[m[2].toLowerCase()], y=+m[3]; if(y<100)y+=2000;
-  if(mo==null) return null;
-  return new Date(y,mo,d);
-}
-function daysOld(s){
-  var d=tallyDate(s); if(!d) return null;
-  return Math.floor((Date.now()-d.getTime())/864e5);
+function periodLabel(){
+  return {month:"This month",quarter:"This quarter","6m":"Last 6 months",year:"This FY",custom:"Custom"}[ui.period];
 }
 
-function bucketOf(bill){
-  // prefer Tally's overdue_days; fall back to computing from bill_date
-  var od = (bill.overdue_days!=null && bill.overdue_days!==0) ? bill.overdue_days : daysOld(bill.bill_date);
-  if(od==null) od=0;
-  if(od<=30) return 0; if(od<=60) return 1; if(od<=90) return 2; return 3;
-}
-
-function render(bills, lastSync){
-  var recv=bills.filter(function(b){return b.party_type==="receivable";});
-  var pay =bills.filter(function(b){return b.party_type==="payable";});
+// ---- screens ----
+function screenHome(){
+  var recv=DATA.bills.filter(function(b){return b.party_type==="receivable";});
+  var pay=DATA.bills.filter(function(b){return b.party_type==="payable";});
   var sum=function(a){return a.reduce(function(t,b){return t+Math.abs(Number(b.amount)||0);},0);};
-  var totR=sum(recv), totP=sum(pay), net=totR-totP;
+  var totR=sum(recv),totP=sum(pay),net=totR-totP;
+  var h='<div class="h1">Finance</div><div class="sub" id="sub"></div>';
+  h+='<div class="card p5"><div class="upph">Net position</div><div class="big" style="color:'+(net>=0?"var(--green)":"var(--red)")+'">'+(net>=0?"+":"−")+inr(Math.abs(net))+'</div>';
+  h+='<div class="muted" style="font-size:13px">'+(net>=0?"Receivables exceed payables by this much (on paper).":"Payables exceed receivables.")+'</div></div>';
+  h+='<div class="grid2"><div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div>';
+  h+='<div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div></div>';
+  // quick sales snapshot (this month)
+  var sm=salesByCustomer(periodRangeMonth());
+  h+='<div class="card p5"><div class="upph">Sales · this month</div><div class="big" style="color:var(--blue);font-size:30px">'+inr(sm.total)+'</div><div class="muted" style="font-size:13px">'+sm.list.length+' customers billed · tap Sales tab for detail</div></div>';
+  return h;
+}
+function periodRangeMonth(){var n=new Date();return [new Date(n.getFullYear(),n.getMonth(),1),n];}
 
-  // ageing buckets for receivables
-  var labels=["0–30 days","31–60 days","61–90 days","90+ days"];
-  var colors=["#34C759","#FFCC00","#FF9500","#FF3B30"];
-  var rb=[0,0,0,0]; recv.forEach(function(b){ rb[bucketOf(b)]+=Math.abs(Number(b.amount)||0); });
-  var current=rb[0]+rb[1], ancient=rb[3];
-
-  var asof = lastSync ? new Date(lastSync).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "unknown";
-  document.getElementById("asof").innerHTML = 'Live from Tally · data as of <b>'+esc(asof)+'</b>';
-
-  var h="";
-  // net position
-  h+='<div class="card p5"><div class="upph">Net position</div>';
-  h+='<div class="big" style="color:'+(net>=0?"var(--green)":"var(--red)")+'">'+(net>=0?"+":"−")+inr(Math.abs(net))+'</div>';
-  h+='<div class="muted" style="font-size:13px">'+(net>=0?"Receivables exceed payables by this much (on paper).":"Payables exceed receivables by this much.")+'</div></div>';
-
-  // two tiles
-  h+='<div class="grid2">';
-  h+='<div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div>';
-  h+='<div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div>';
+function ageBuckets(list){
+  var b=[0,0,0,0], un=0;
+  list.forEach(function(x){
+    var od=Number(x.overdue_days)||0;
+    if(!od){ var d=parseDate(x.bill_date)||parseDate(x.due_date); od=d?Math.floor((Date.now()-d.getTime())/864e5):-1; }
+    var amt=Math.abs(Number(x.amount)||0);
+    if(od<0){un++; b[0]+=amt;} else if(od<=30)b[0]+=amt; else if(od<=60)b[1]+=amt; else if(od<=90)b[2]+=amt; else b[3]+=amt;
+  });
+  return {b:b,un:un};
+}
+function ageingCard(title,list,color){
+  var r=ageBuckets(list), tot=r.b.reduce(function(a,c){return a+c;},0);
+  var labels=["0–30d","31–60d","61–90d","90+d"], cols=["#34C759","#FFCC00","#FF9500","#FF3B30"];
+  var h='<div class="card p5"><div class="upph">'+title+'</div>';
+  if(tot<=0){h+='<div class="muted" style="margin-top:8px">No bills.</div></div>';return h;}
+  h+='<div class="bar">'; r.b.forEach(function(v,i){var p=v/tot*100;if(p>0)h+='<i style="width:'+p+'%;background:'+cols[i]+'"></i>';}); h+='</div><div class="legend">';
+  labels.forEach(function(l,i){h+='<span><span class="dot" style="background:'+cols[i]+'"></span>'+l+' · '+inr(r.b[i])+'</span>';});
   h+='</div>';
+  var ancient=r.b[3], pc=tot>0?Math.round(ancient/tot*100):0;
+  h+='<div class="row" style="padding-left:0;padding-right:0;border-top:.5px solid var(--sep);margin-top:12px"><span class="grow muted">90+ days (likely old/paper)</span><b style="color:var(--red)">'+inr(ancient)+' · '+pc+'%</b></div>';
+  return h;
+}
+function screenAgeing(){
+  var recv=DATA.bills.filter(function(b){return b.party_type==="receivable";});
+  var pay=DATA.bills.filter(function(b){return b.party_type==="payable";});
+  var h='<div class="h1">Ageing</div><div class="sub">How old your dues are — current vs ancient.</div>';
+  var unr=ageBuckets(recv).un+ageBuckets(pay).un;
+  if(unr>0) h+='<div class="note">'+unr+' bills had no usable date in the sync, so they\'re shown as current. If the buckets look off, the connector\'s bill-date field needs one tweak — tell me and I\'ll fix it.</div>';
+  h+=ageingCard("Receivables ageing",recv,"var(--green)");
+  h+=ageingCard("Payables ageing",pay,"var(--red)");
+  return h;
+}
 
-  // receivables ageing
-  h+='<div class="card p5"><div class="upph">Receivables ageing</div>';
-  if(totR>0){
-    h+='<div class="bar" style="margin:14px 0 0">';
-    rb.forEach(function(v,i){ var pct=totR>0?(v/totR*100):0; if(pct>0) h+='<i style="width:'+pct+'%;background:'+colors[i]+'"></i>'; });
-    h+='</div><div class="legend">';
-    labels.forEach(function(l,i){ h+='<span><span class="dot" style="background:'+colors[i]+'"></span>'+l+' · '+inr(rb[i])+'</span>'; });
+function salesByCustomer(range){
+  var f=range[0].getTime(), t=range[1].getTime();
+  var map={}, total=0;
+  DATA.vouchers.forEach(function(v){
+    if(String(v.vch_type||"").toLowerCase()!=="sales") return;
+    var d=parseDate(v.date); if(!d) return; var tm=d.getTime(); if(tm<f||tm>t) return;
+    var amt=Math.abs(Number(v.amount)||0); var p=v.party||"(no name)";
+    if(!map[p]) map[p]={party:p,total:0,count:0}; map[p].total+=amt; map[p].count++; total+=amt;
+  });
+  var list=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.total-a.total;});
+  return {list:list,total:total};
+}
+function salesInvoices(party,range){
+  var f=range[0].getTime(), t=range[1].getTime(); var out=[];
+  DATA.vouchers.forEach(function(v){
+    if(String(v.vch_type||"").toLowerCase()!=="sales"||v.party!==party) return;
+    var d=parseDate(v.date); if(!d) return; var tm=d.getTime(); if(tm<f||tm>t) return;
+    out.push({date:d,amount:Math.abs(Number(v.amount)||0),narration:v.narration});
+  });
+  return out.sort(function(a,b){return b.date-a.date;});
+}
+function salesProducts(party,range){
+  // only if sales_lines synced
+  if(!DATA.sales.length) return null;
+  var f=range[0].getTime(), t=range[1].getTime(); var map={};
+  DATA.sales.forEach(function(s){
+    if(s.customer!==party) return; var d=parseDate(s.date_iso); if(!d)return; var tm=d.getTime(); if(tm<f||tm>t)return;
+    var key=(s.description||s.item||"(item)");
+    if(!map[key])map[key]={name:key,qty:0,amount:0,unit:s.unit||""}; map[key].qty+=Number(s.qty)||0; map[key].amount+=Number(s.amount)||0;
+  });
+  return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.amount-a.amount;});
+}
+
+function screenSales(){
+  var range=periodRange();
+  var h='<div class="h1">Sales</div>';
+  h+='<div class="seg">'+["month","quarter","6m","year","custom"].map(function(p){
+    return '<button class="'+(ui.period===p?"on":"")+'" data-act="period" data-v="'+p+'">'+
+      {month:"Month",quarter:"Qtr","6m":"6 mo",year:"Year",custom:"Custom"}[p]+'</button>';}).join("")+'</div>';
+  if(ui.period==="custom"){
+    h+='<div class="datey"><input type="date" id="cf" value="'+esc(ui.custFrom)+'" data-act="cf"><input type="date" id="ct" value="'+esc(ui.custTo)+'" data-act="ct"></div>';
+  }
+  if(ui.openCust){
+    var inv=salesInvoices(ui.openCust,range);
+    var prods=salesProducts(ui.openCust,range);
+    h+='<button class="back" data-act="closecust">‹ All customers</button>';
+    h+='<div class="card p4"><div style="font-size:17px;font-weight:600">'+esc(ui.openCust)+'</div><div class="muted" style="font-size:13px">'+periodLabel()+' · '+inr(inv.reduce(function(t,x){return t+x.amount;},0))+' over '+inv.length+' invoices</div></div>';
+    if(prods){
+      h+='<div class="upph" style="margin:4px 2px 8px">Product-wise (qty × value)</div><div class="card p0">';
+      if(!prods.length) h+='<div class="p4 muted">No product lines in this period.</div>';
+      prods.forEach(function(p){ h+='<div class="row"><div class="grow"><div class="trunc" style="font-weight:500">'+esc(p.name)+'</div><div class="muted" style="font-size:12px">'+(p.qty.toLocaleString("en-IN"))+' '+esc(p.unit)+'</div></div><b>'+inr(p.amount)+'</b></div>'; });
+      h+='</div>';
+    } else {
+      h+='<div class="note">Product-wise breakdown will appear here once the sales-line sync is run on the accounts PC. Below are the invoices for now.</div>';
+    }
+    h+='<div class="upph" style="margin:14px 2px 8px">Invoices</div><div class="card p0">';
+    if(!inv.length)h+='<div class="p4 muted">No sales in this period.</div>';
+    inv.forEach(function(x){ h+='<div class="row"><div class="grow"><div style="font-weight:500">'+dlabel(x.date)+'</div>'+(x.narration?'<div class="muted trunc" style="font-size:12px">'+esc(x.narration)+'</div>':'')+'</div><b>'+inr(x.amount)+'</b></div>'; });
     h+='</div>';
-    h+='<div class="row" style="margin-top:14px"><span class="muted">Current (under 60 days)</span><b style="color:var(--green)">'+inr(current)+'</b></div>';
-    h+='<div class="row"><span class="muted">Ancient (90+ days) — likely paper</span><b style="color:var(--red)">'+inr(ancient)+'</b></div>';
-    var pctAncient = totR>0?Math.round(ancient/totR*100):0;
-    h+='<div class="muted" style="font-size:13px;margin-top:8px">'+pctAncient+'% of your receivables are over 90 days old. The real collectible number is closer to the current band — that gap is the first thing to investigate.</div>';
-  } else { h+='<div class="muted" style="margin-top:10px">No receivable bills found.</div>'; }
+    return h;
+  }
+  var s=salesByCustomer(range);
+  h+='<div class="card p4"><div class="upph">'+periodLabel()+' · total sales</div><div class="big" style="color:var(--blue);font-size:30px;margin:4px 0 0">'+inr(s.total)+'</div><div class="muted" style="font-size:13px">'+s.list.length+' customers</div></div>';
+  if(!s.list.length){h+='<div class="card p4 muted">No sales vouchers in this period.</div>';return h;}
+  h+='<div class="card p0">';
+  s.list.forEach(function(c){ h+='<button class="row" data-act="opencust" data-v="'+esc(c.party)+'"><div class="grow"><div class="trunc" style="font-weight:500">'+esc(c.party)+'</div><div class="muted" style="font-size:12px">'+c.count+' invoice'+(c.count>1?"s":"")+'</div></div><b style="color:var(--blue)">'+inr(c.total)+'</b><span class="chev">›</span></button>'; });
   h+='</div>';
-
-  // refresh
-  h+='<div style="text-align:center;margin-top:18px"><button class="btn" onclick="location.reload()">Refresh</button></div>';
-  h+='<div class="muted" style="text-align:center;font-size:12px;margin-top:10px">Figures mirror Tally. "Ancient" bills include old opening-balance carry-forwards.</div>';
-
-  document.getElementById("content").innerHTML=h;
+  return h;
 }
 
-function showError(msg){
-  document.getElementById("asof").textContent="Couldn't load data";
-  document.getElementById("content").innerHTML =
-    '<div class="err"><b>Could not read your data.</b><br>'+esc(msg)+
-    '<br><br>Most likely one of: the read-access SQL hasn\'t been run, the publishable key changed, or there\'s no internet. '+
-    'Send me this message and I\'ll pinpoint it.</div>';
+function screenBalances(){
+  var grp={}; var gmap={};
+  DATA.ledgers.forEach(function(l){gmap[l.name]=l.parent_group||"(ungrouped)";});
+  DATA.trial.forEach(function(t){
+    var g=gmap[t.ledger]||"(ungrouped)";
+    var net=(Number(t.closing_dr)||0)-(Number(t.closing_cr)||0);
+    if(!grp[g])grp[g]={group:g,net:0,n:0}; grp[g].net+=net; grp[g].n++;
+  });
+  var list=Object.keys(grp).map(function(k){return grp[k];}).sort(function(a,b){return Math.abs(b.net)-Math.abs(a.net);});
+  var h='<div class="h1">Balances</div><div class="sub">Closing balances grouped by Tally group. Dr positive, Cr negative.</div>';
+  h+='<div class="card p0">';
+  list.forEach(function(g){ h+='<div class="row"><div class="grow trunc">'+esc(g.group)+'<div class="muted" style="font-size:12px">'+g.n+' ledgers</div></div><b style="color:'+(g.net>=0?"var(--label)":"var(--red)")+'">'+inr(g.net)+'</b></div>'; });
+  h+='</div><div class="muted" style="font-size:12px;margin-top:10px;text-align:center">Formal P&amp;L grouping (income vs expense) can be layered on next.</div>';
+  return h;
 }
 
-// ---- load ----
-Promise.all([
-  api("outstanding_bills?select=party_type,amount,overdue_days,bill_date,due_date&limit=5000"),
-  api("sync_log?select=ran_at,status&order=ran_at.desc&limit=1")
-]).then(function(res){
-  var bills=res[0]||[];
-  var lastSync = (res[1] && res[1][0]) ? res[1][0].ran_at : null;
-  if(!bills.length){ showError("Connected, but no bills were returned. The tables may be empty, or read access isn't granted yet."); return; }
-  render(bills, lastSync);
-}).catch(function(e){ showError(e.message||String(e)); });
+function render(){
+  var h;
+  if(ui.tab==="home")h=screenHome();
+  else if(ui.tab==="ageing")h=screenAgeing();
+  else if(ui.tab==="sales")h=screenSales();
+  else h=screenBalances();
+  document.getElementById("app").innerHTML=h;
+  var sub=document.getElementById("sub");
+  if(sub){ var as=DATA.lastSync?new Date(DATA.lastSync).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}):"unknown"; sub.innerHTML='Live from Tally · as of <b>'+esc(as)+'</b>'; }
+  var tabs=[["home","Home"],["ageing","Ageing"],["sales","Sales"],["balances","Balances"]];
+  document.getElementById("tabbar").innerHTML=tabs.map(function(t){return '<button class="'+(ui.tab===t[0]?"on":"")+'" data-act="tab" data-v="'+t[0]+'"><span>'+t[1]+'</span></button>';}).join("");
+}
+
+document.addEventListener("click",function(ev){
+  var t=ev.target.closest("[data-act]"); if(!t)return;
+  var a=t.getAttribute("data-act"), v=t.getAttribute("data-v");
+  if(a==="tab"){ui.tab=v;ui.openCust=null;window.scrollTo(0,0);render();}
+  else if(a==="period"){ui.period=v;ui.openCust=null;render();}
+  else if(a==="opencust"){ui.openCust=v;window.scrollTo(0,0);render();}
+  else if(a==="closecust"){ui.openCust=null;window.scrollTo(0,0);render();}
+});
+document.addEventListener("change",function(ev){
+  var t=ev.target,a=t.getAttribute&&t.getAttribute("data-act"); if(!a)return;
+  if(a==="cf"){ui.custFrom=t.value;render();} else if(a==="ct"){ui.custTo=t.value;render();}
+});
+
+load();
 </script>
 </body>
 </html>
