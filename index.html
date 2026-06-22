@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hueman — Finance Dashboard</title>
+<style>
+:root{
+  --bg:#F2F2F7;--card:#fff;--label:#1C1C1E;--label2:#8E8E93;--sep:rgba(60,60,67,.10);
+  --blue:#007AFF;--red:#FF3B30;--green:#34C759;--orange:#FF9500;--gray:#8E8E93;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;background:var(--bg);color:var(--label);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;}
+#app{max-width:640px;margin:0 auto;padding:24px 16px 80px;}
+.h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:4px 2px 2px;}
+.sub{color:var(--label2);font-size:13px;margin:0 2px 18px;}
+.card{background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);margin-bottom:14px;}
+.p5{padding:20px;}.p4{padding:16px;}
+.upph{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label2);}
+.big{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:6px 0;font-variant-numeric:tabular-nums;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.tile{background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);padding:16px;}
+.tile .t{font-size:13px;font-weight:500;color:var(--label2);}
+.tile .v{font-size:24px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;}
+.tile .s{font-size:12px;color:var(--label2);margin-top:2px;}
+.bar{height:10px;border-radius:8px;background:#EFEFF4;overflow:hidden;display:flex;}
+.bar>i{display:block;height:100%;}
+.legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--label2);flex-wrap:wrap;}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:.5px solid var(--sep);font-variant-numeric:tabular-nums;}
+.row:first-child{border-top:none;}
+.btn{padding:10px 16px;border:none;border-radius:12px;font-size:15px;font-weight:600;color:#fff;background:var(--blue);cursor:pointer;font-family:inherit;}
+.btn:active{opacity:.7;}
+.muted{color:var(--label2);}
+.err{background:#fff3f2;border:1px solid #ffd5d2;color:#b3261e;border-radius:14px;padding:16px;font-size:14px;line-height:1.5;}
+.spin{width:26px;height:26px;border:3px solid #e5e5ea;border-top-color:var(--blue);border-radius:50%;animation:r 1s linear infinite;margin:30px auto;}
+@keyframes r{to{transform:rotate(360deg)}}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EFEFF4;color:var(--label2);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="h1">Finance</div>
+  <div class="sub" id="asof">Loading your live Tally data…</div>
+  <div id="content"><div class="spin"></div></div>
+</div>
+
+<script>
+"use strict";
+// ---- Supabase connection ----
+var SUPABASE_URL = "https://qqkufmmjsvomdqioxvkg.supabase.co";
+var SUPABASE_KEY = "sb_publishable_PAAtoU88WPBxRg8591aK_w_reblOaRc";
+
+function api(path){
+  return fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    headers:{ apikey:SUPABASE_KEY, Authorization:"Bearer "+SUPABASE_KEY }
+  }).then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error("HTTP "+r.status+": "+t.slice(0,200)); });
+    return r.json();
+  });
+}
+
+function inr(n){
+  var v=Math.abs(Number(n)||0), s=(Number(n)||0)<0?"-":"";
+  if(v>=1e7) return s+"₹"+(v/1e7).toFixed(2)+" Cr";
+  if(v>=1e5) return s+"₹"+(v/1e5).toFixed(2)+" L";
+  return s+"₹"+Math.round(v).toLocaleString("en-IN");
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+// Parse Tally date like "1-Apr-26" -> JS Date
+var MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function tallyDate(s){
+  if(!s) return null;
+  var m=String(s).match(/(\d{1,2})-([A-Za-z]{3})-(\d{2,4})/);
+  if(!m) return null;
+  var d=+m[1], mo=MON[m[2].toLowerCase()], y=+m[3]; if(y<100)y+=2000;
+  if(mo==null) return null;
+  return new Date(y,mo,d);
+}
+function daysOld(s){
+  var d=tallyDate(s); if(!d) return null;
+  return Math.floor((Date.now()-d.getTime())/864e5);
+}
+
+function bucketOf(bill){
+  // prefer Tally's overdue_days; fall back to computing from bill_date
+  var od = (bill.overdue_days!=null && bill.overdue_days!==0) ? bill.overdue_days : daysOld(bill.bill_date);
+  if(od==null) od=0;
+  if(od<=30) return 0; if(od<=60) return 1; if(od<=90) return 2; return 3;
+}
+
+function render(bills, lastSync){
+  var recv=bills.filter(function(b){return b.party_type==="receivable";});
+  var pay =bills.filter(function(b){return b.party_type==="payable";});
+  var sum=function(a){return a.reduce(function(t,b){return t+Math.abs(Number(b.amount)||0);},0);};
+  var totR=sum(recv), totP=sum(pay), net=totR-totP;
+
+  // ageing buckets for receivables
+  var labels=["0–30 days","31–60 days","61–90 days","90+ days"];
+  var colors=["#34C759","#FFCC00","#FF9500","#FF3B30"];
+  var rb=[0,0,0,0]; recv.forEach(function(b){ rb[bucketOf(b)]+=Math.abs(Number(b.amount)||0); });
+  var current=rb[0]+rb[1], ancient=rb[3];
+
+  var asof = lastSync ? new Date(lastSync).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "unknown";
+  document.getElementById("asof").innerHTML = 'Live from Tally · data as of <b>'+esc(asof)+'</b>';
+
+  var h="";
+  // net position
+  h+='<div class="card p5"><div class="upph">Net position</div>';
+  h+='<div class="big" style="color:'+(net>=0?"var(--green)":"var(--red)")+'">'+(net>=0?"+":"−")+inr(Math.abs(net))+'</div>';
+  h+='<div class="muted" style="font-size:13px">'+(net>=0?"Receivables exceed payables by this much (on paper).":"Payables exceed receivables by this much.")+'</div></div>';
+
+  // two tiles
+  h+='<div class="grid2">';
+  h+='<div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div>';
+  h+='<div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div>';
+  h+='</div>';
+
+  // receivables ageing
+  h+='<div class="card p5"><div class="upph">Receivables ageing</div>';
+  if(totR>0){
+    h+='<div class="bar" style="margin:14px 0 0">';
+    rb.forEach(function(v,i){ var pct=totR>0?(v/totR*100):0; if(pct>0) h+='<i style="width:'+pct+'%;background:'+colors[i]+'"></i>'; });
+    h+='</div><div class="legend">';
+    labels.forEach(function(l,i){ h+='<span><span class="dot" style="background:'+colors[i]+'"></span>'+l+' · '+inr(rb[i])+'</span>'; });
+    h+='</div>';
+    h+='<div class="row" style="margin-top:14px"><span class="muted">Current (under 60 days)</span><b style="color:var(--green)">'+inr(current)+'</b></div>';
+    h+='<div class="row"><span class="muted">Ancient (90+ days) — likely paper</span><b style="color:var(--red)">'+inr(ancient)+'</b></div>';
+    var pctAncient = totR>0?Math.round(ancient/totR*100):0;
+    h+='<div class="muted" style="font-size:13px;margin-top:8px">'+pctAncient+'% of your receivables are over 90 days old. The real collectible number is closer to the current band — that gap is the first thing to investigate.</div>';
+  } else { h+='<div class="muted" style="margin-top:10px">No receivable bills found.</div>'; }
+  h+='</div>';
+
+  // refresh
+  h+='<div style="text-align:center;margin-top:18px"><button class="btn" onclick="location.reload()">Refresh</button></div>';
+  h+='<div class="muted" style="text-align:center;font-size:12px;margin-top:10px">Figures mirror Tally. "Ancient" bills include old opening-balance carry-forwards.</div>';
+
+  document.getElementById("content").innerHTML=h;
+}
+
+function showError(msg){
+  document.getElementById("asof").textContent="Couldn't load data";
+  document.getElementById("content").innerHTML =
+    '<div class="err"><b>Could not read your data.</b><br>'+esc(msg)+
+    '<br><br>Most likely one of: the read-access SQL hasn\'t been run, the publishable key changed, or there\'s no internet. '+
+    'Send me this message and I\'ll pinpoint it.</div>';
+}
+
+// ---- load ----
+Promise.all([
+  api("outstanding_bills?select=party_type,amount,overdue_days,bill_date,due_date&limit=5000"),
+  api("sync_log?select=ran_at,status&order=ran_at.desc&limit=1")
+]).then(function(res){
+  var bills=res[0]||[];
+  var lastSync = (res[1] && res[1][0]) ? res[1][0].ran_at : null;
+  if(!bills.length){ showError("Connected, but no bills were returned. The tables may be empty, or read access isn't granted yet."); return; }
+  render(bills, lastSync);
+}).catch(function(e){ showError(e.message||String(e)); });
+</script>
+</body>
+</html>
