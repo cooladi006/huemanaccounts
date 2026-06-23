@@ -5,15 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Hueman Finance</title>
 <meta name="theme-color" content="#0e1726" />
-<link rel="manifest" href='data:application/manifest+json,{"name":"Hueman Finance","short_name":"Hueman","start_url":".","display":"standalone","background_color":"%23F2F2F7","theme_color":"%230e1726","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 rx=%2242%22 fill=%22%230e1726%22/%3E%3Ctext x=%2296%22 y=%22128%22 font-size=%22104%22 fill=%22%23c9962e%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22%3EH%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Hueman" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
 <style>
 :root{--bg:#F2F2F7;--card:#fff;--label:#1C1C1E;--label2:#8E8E93;--sep:rgba(60,60,67,.10);
 --blue:#007AFF;--red:#FF3B30;--green:#34C759;--orange:#FF9500;--gray:#8E8E93;--gold:#c9962e;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;background:var(--bg);color:var(--label);
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;}
+html,body{margin:0;background:var(--bg);color:var(--label);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;}
 ::-webkit-scrollbar{display:none;}
-#app{max-width:640px;margin:0 auto;padding:22px 16px 90px;}
+#app{max-width:640px;margin:0 auto;padding:22px 16px 92px;}
 .h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:2px 2px 2px;}
 .sub{color:var(--label2);font-size:13px;margin:0 2px 16px;}
 .card{background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);margin-bottom:14px;}
@@ -42,55 +44,57 @@ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Ro
 .spin{width:26px;height:26px;border:3px solid #e5e5ea;border-top-color:var(--blue);border-radius:50%;animation:r 1s linear infinite;margin:40px auto;}
 @keyframes r{to{transform:rotate(360deg)}}
 .back{background:none;border:none;color:var(--blue);font-size:16px;font-family:inherit;cursor:pointer;padding:0;margin-bottom:8px;display:inline-flex;gap:4px;align-items:center;}
-.tab{position:fixed;left:0;right:0;bottom:0;background:rgba(249,249,249,.88);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);z-index:50;}
+.tab{position:fixed;left:0;right:0;bottom:0;background:rgba(249,249,249,.9);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);z-index:50;}
 .tabin{max-width:640px;margin:0 auto;display:flex;padding-bottom:env(safe-area-inset-bottom);}
 .tabin button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;background:none;border:none;color:#999A9E;font-family:inherit;cursor:pointer;font-size:10px;font-weight:500;}
 .tabin button.on{color:var(--blue);}
 .datey{display:flex;gap:8px;margin-bottom:14px;}
 .datey input{flex:1;padding:9px 12px;border:1px solid var(--sep);border-radius:11px;font-size:14px;font-family:inherit;background:#fff;}
+.tinput{width:64px;text-align:right;padding:6px 8px;font-size:15px;border:1px solid var(--sep);border-radius:9px;font-family:inherit;font-variant-numeric:tabular-nums;background:#fff;}
+.chip{font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;flex:none;}
+.chipP{background:rgba(0,122,255,.12);color:var(--blue);}
+.chipS{background:rgba(142,142,147,.16);color:var(--gray);}
+.secthead{display:flex;justify-content:space-between;align-items:center;padding:0 4px 6px;margin-top:4px;}
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;font-size:13px;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none;}
+.toast.show{opacity:.95;}
 svg{display:block;}
 </style>
 </head>
 <body>
 <div id="app"><div class="spin"></div></div>
+<div class="toast" id="toast"></div>
 <nav class="tab"><div class="tabin" id="tabbar"></div></nav>
 <script>
 "use strict";
 var SUPABASE_URL="https://qqkufmmjsvomdqioxvkg.supabase.co";
 var SUPABASE_KEY="sb_publishable_PAAtoU88WPBxRg8591aK_w_reblOaRc";
+var HDR={apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY};
 
-function api(path){
-  return fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}})
-    .then(function(r){ if(!r.ok) return r.text().then(function(t){throw new Error("HTTP "+r.status+": "+t.slice(0,160));}); return r.json(); });
-}
-function fetchAll(path){
-  var all=[],from=0,page=1000;
-  function more(){
-    return api(path+(path.indexOf("?")>=0?"&":"?")+"limit="+page+"&offset="+from).then(function(rows){
-      all=all.concat(rows); if(rows.length<page||from>30000) return all; from+=page; return more();
-    });
-  }
-  return more();
-}
+function api(path){return fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:HDR}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error("HTTP "+r.status+": "+t.slice(0,160));});return r.json();});}
+function fetchAll(path){var all=[],from=0,page=1000;function more(){return api(path+(path.indexOf("?")>=0?"&":"?")+"limit="+page+"&offset="+from).then(function(rows){all=all.concat(rows);if(rows.length<page||from>30000)return all;from+=page;return more();});}return more();}
+function sbWrite(table,row,conflict){return fetch(SUPABASE_URL+"/rest/v1/"+table+"?on_conflict="+conflict,{method:"POST",headers:Object.assign({},HDR,{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(row)});}
 
-function inr(n){var v=Math.abs(Number(n)||0),s=(Number(n)||0)<0?"-":"";
-  if(v>=1e7)return s+"₹"+(v/1e7).toFixed(2)+" Cr"; if(v>=1e5)return s+"₹"+(v/1e5).toFixed(2)+" L";
-  return s+"₹"+Math.round(v).toLocaleString("en-IN");}
+function inr(n){var v=Math.abs(Number(n)||0),s=(Number(n)||0)<0?"-":"";if(v>=1e7)return s+"₹"+(v/1e7).toFixed(2)+" Cr";if(v>=1e5)return s+"₹"+(v/1e5).toFixed(2)+" L";return s+"₹"+Math.round(v).toLocaleString("en-IN");}
+function lk(n){return (Number(n)||0).toFixed(2);}            // lakhs, 2 dp
+function toL(rupees){return (Number(rupees)||0)/1e5;}        // rupees -> lakhs
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function pctColor(p){return p>=100?"var(--green)":p>=60?"var(--orange)":"var(--red)";}
 
 var MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-function parseDate(s){
-  if(!s)return null; s=String(s).trim();
-  var m=s.match(/^(\d{4})(\d{2})(\d{2})$/); if(m)return new Date(+m[1],+m[2]-1,+m[3]);
-  m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)return new Date(+m[1],+m[2]-1,+m[3]);
-  m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/); if(m){var y=+m[3];if(y<100)y+=2000;var mo=MON[m[2].toLowerCase()];if(mo!=null)return new Date(y,mo,+m[1]);}
-  return null;
-}
+function parseDate(s){if(!s)return null;s=String(s).trim();var m=s.match(/^(\d{4})(\d{2})(\d{2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);if(m){var y=+m[3];if(y<100)y+=2000;var mo=MON[m[2].toLowerCase()];if(mo!=null)return new Date(y,mo,+m[1]);}return null;}
 function dlabel(d){return d?d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"2-digit"}):"—";}
+function curMonth(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0");}
+function monthRange(ym){var p=ym.split("-"),y=+p[0],m=+p[1]-1;return [new Date(y,m,1),new Date(y,m+1,0,23,59,59)];}
+function monthLabel(ym){var p=ym.split("-");return new Date(+p[0],+p[1]-1,1).toLocaleDateString("en-IN",{month:"long",year:"numeric"});}
 
-// ---- state ----
-var DATA={bills:[],vouchers:[],ledgers:[],trial:[],sales:[],lastSync:null};
-var ui={tab:"home",period:"month",custFrom:"",custTo:"",openCust:null};
+// Primary-customer default classifier (seeded from your sheet); editable & saved per customer
+var PRIMARY_KEYS=["eurokem","milky mist","carewell","mathangi","s.kam","skam","linux life","til health","kausikh","safetab","bafna","smv","chippy"];
+function defaultTier(name){var n=(name||"").toLowerCase();for(var i=0;i<PRIMARY_KEYS.length;i++)if(n.indexOf(PRIMARY_KEYS[i])>=0)return "P";return "S";}
+
+var DATA={bills:[],vouchers:[],ledgers:[],trial:[],sales:[],targets:[],tiers:{},lastSync:null};
+var ui={tab:"home",period:"month",basis:"net",custFrom:"",custTo:"",openCust:null,tmonth:curMonth()};
+
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},1400);}
 
 function load(){
   document.getElementById("app").innerHTML='<div class="spin"></div>';
@@ -99,198 +103,162 @@ function load(){
     fetchAll("vouchers?select=vch_type,date,party,amount,narration"),
     fetchAll("tally_ledgers?select=name,parent_group"),
     fetchAll("trial_balance?select=ledger,closing_dr,closing_cr"),
-    fetchAll("sales_lines?select=date_iso,customer,item,description,qty,unit,rate,amount,voucher_no").catch(function(){return [];}),
-    api("sync_log?select=ran_at,status&order=ran_at.desc&limit=1").catch(function(){return [];})
+    fetchAll("sales_lines?select=date_iso,customer,item,description,qty,unit,rate,amount").catch(function(){return[];}),
+    fetchAll("sales_targets?select=id,month,customer,target_lakhs").catch(function(){return[];}),
+    fetchAll("assumptions?select=key,value").catch(function(){return[];}),
+    api("sync_log?select=ran_at&order=ran_at.desc&limit=1").catch(function(){return[];})
   ]).then(function(res){
-    DATA.bills=res[0]||[]; DATA.vouchers=res[1]||[]; DATA.ledgers=res[2]||[];
-    DATA.trial=res[3]||[]; DATA.sales=res[4]||[];
-    DATA.lastSync=(res[5]&&res[5][0])?res[5][0].ran_at:null;
+    DATA.bills=res[0]||[];DATA.vouchers=res[1]||[];DATA.ledgers=res[2]||[];DATA.trial=res[3]||[];
+    DATA.sales=res[4]||[];DATA.targets=res[5]||[];
+    DATA.tiers={};(res[6]||[]).forEach(function(a){if((a.key||"").indexOf("tier:")===0)DATA.tiers[a.key.slice(5)]=(Number(a.value)===1?"P":"S");});
+    DATA.lastSync=(res[7]&&res[7][0])?res[7][0].ran_at:null;
     render();
-  }).catch(function(e){
-    document.getElementById("app").innerHTML='<div class="h1">Finance</div><div class="err"><b>Could not read your data.</b><br>'+esc(e.message||e)+'</div>';
-  });
+  }).catch(function(e){document.getElementById("app").innerHTML='<div class="h1">Finance</div><div class="err"><b>Could not read your data.</b><br>'+esc(e.message||e)+'</div>';});
 }
 
-// ---- period helpers ----
-function periodRange(){
-  var now=new Date(), y=now.getFullYear(), mo=now.getMonth();
-  if(ui.period==="month") return [new Date(y,mo,1), now];
-  if(ui.period==="quarter"){ var qs=Math.floor(mo/3)*3; return [new Date(y,qs,1), now]; }
-  if(ui.period==="6m"){ return [new Date(y,mo-5,1), now]; }
-  if(ui.period==="year"){ var fy=(mo>=3)?y:y-1; return [new Date(fy,3,1), new Date(fy+1,2,31,23,59)]; }
-  if(ui.period==="custom"){
-    var f=ui.custFrom?new Date(ui.custFrom):new Date(y,mo,1);
-    var t=ui.custTo?new Date(ui.custTo+"T23:59"):now; return [f,t];
+function tierOf(name){return DATA.tiers[name]||defaultTier(name);}
+
+// achieved sales per customer (rupees). basis 'net' uses sales_lines (pre-GST), else voucher totals (gross)
+function achievedMap(range,basis){
+  var f=range[0].getTime(),t=range[1].getTime(),map={},netUnavail=false;
+  if(basis==="net"&&DATA.sales.length){
+    DATA.sales.forEach(function(s){var d=parseDate(s.date_iso);if(!d)return;var tm=d.getTime();if(tm<f||tm>t)return;var c=s.customer||"(no name)";map[c]=(map[c]||0)+(Number(s.amount)||0);});
+  }else{
+    if(basis==="net")netUnavail=true;
+    DATA.vouchers.forEach(function(v){if(String(v.vch_type||"").toLowerCase()!=="sales")return;var d=parseDate(v.date);if(!d)return;var tm=d.getTime();if(tm<f||tm>t)return;var c=v.party||"(no name)";map[c]=(map[c]||0)+Math.abs(Number(v.amount)||0);});
   }
-  return [new Date(y,mo,1), now];
-}
-function periodLabel(){
-  return {month:"This month",quarter:"This quarter","6m":"Last 6 months",year:"This FY",custom:"Custom"}[ui.period];
+  return {map:map,netUnavail:netUnavail};
 }
 
-// ---- screens ----
+// ---------- period helpers (Sales tab) ----------
+function periodRange(){var now=new Date(),y=now.getFullYear(),mo=now.getMonth();
+  if(ui.period==="month")return[new Date(y,mo,1),now];
+  if(ui.period==="quarter"){var qs=Math.floor(mo/3)*3;return[new Date(y,qs,1),now];}
+  if(ui.period==="6m")return[new Date(y,mo-5,1),now];
+  if(ui.period==="year"){var fy=(mo>=3)?y:y-1;return[new Date(fy,3,1),new Date(fy+1,2,31,23,59)];}
+  if(ui.period==="custom"){var f=ui.custFrom?new Date(ui.custFrom):new Date(y,mo,1),t=ui.custTo?new Date(ui.custTo+"T23:59"):now;return[f,t];}
+  return[new Date(y,mo,1),now];}
+function periodLabel(){return{month:"This month",quarter:"This quarter","6m":"Last 6 months",year:"This FY",custom:"Custom"}[ui.period];}
+function basisToggle(){return '<div class="seg" style="max-width:240px"><button class="'+(ui.basis==="net"?"on":"")+'" data-act="basis" data-v="net">Net (no GST)</button><button class="'+(ui.basis==="gross"?"on":"")+'" data-act="basis" data-v="gross">Gross</button></div>';}
+
+// ---------- screens ----------
 function screenHome(){
   var recv=DATA.bills.filter(function(b){return b.party_type==="receivable";});
   var pay=DATA.bills.filter(function(b){return b.party_type==="payable";});
   var sum=function(a){return a.reduce(function(t,b){return t+Math.abs(Number(b.amount)||0);},0);};
   var totR=sum(recv),totP=sum(pay),net=totR-totP;
   var h='<div class="h1">Finance</div><div class="sub" id="sub"></div>';
-  h+='<div class="card p5"><div class="upph">Net position</div><div class="big" style="color:'+(net>=0?"var(--green)":"var(--red)")+'">'+(net>=0?"+":"−")+inr(Math.abs(net))+'</div>';
-  h+='<div class="muted" style="font-size:13px">'+(net>=0?"Receivables exceed payables by this much (on paper).":"Payables exceed receivables.")+'</div></div>';
-  h+='<div class="grid2"><div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div>';
-  h+='<div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div></div>';
-  // quick sales snapshot (this month)
-  var sm=salesByCustomer(periodRangeMonth());
-  h+='<div class="card p5"><div class="upph">Sales · this month</div><div class="big" style="color:var(--blue);font-size:30px">'+inr(sm.total)+'</div><div class="muted" style="font-size:13px">'+sm.list.length+' customers billed · tap Sales tab for detail</div></div>';
-  return h;
-}
-function periodRangeMonth(){var n=new Date();return [new Date(n.getFullYear(),n.getMonth(),1),n];}
-
-function ageBuckets(list){
-  var b=[0,0,0,0], un=0;
-  list.forEach(function(x){
-    var od=Number(x.overdue_days)||0;
-    if(!od){ var d=parseDate(x.bill_date)||parseDate(x.due_date); od=d?Math.floor((Date.now()-d.getTime())/864e5):-1; }
-    var amt=Math.abs(Number(x.amount)||0);
-    if(od<0){un++; b[0]+=amt;} else if(od<=30)b[0]+=amt; else if(od<=60)b[1]+=amt; else if(od<=90)b[2]+=amt; else b[3]+=amt;
-  });
-  return {b:b,un:un};
-}
-function ageingCard(title,list,color){
-  var r=ageBuckets(list), tot=r.b.reduce(function(a,c){return a+c;},0);
-  var labels=["0–30d","31–60d","61–90d","90+d"], cols=["#34C759","#FFCC00","#FF9500","#FF3B30"];
-  var h='<div class="card p5"><div class="upph">'+title+'</div>';
-  if(tot<=0){h+='<div class="muted" style="margin-top:8px">No bills.</div></div>';return h;}
-  h+='<div class="bar">'; r.b.forEach(function(v,i){var p=v/tot*100;if(p>0)h+='<i style="width:'+p+'%;background:'+cols[i]+'"></i>';}); h+='</div><div class="legend">';
-  labels.forEach(function(l,i){h+='<span><span class="dot" style="background:'+cols[i]+'"></span>'+l+' · '+inr(r.b[i])+'</span>';});
-  h+='</div>';
-  var ancient=r.b[3], pc=tot>0?Math.round(ancient/tot*100):0;
-  h+='<div class="row" style="padding-left:0;padding-right:0;border-top:.5px solid var(--sep);margin-top:12px"><span class="grow muted">90+ days (likely old/paper)</span><b style="color:var(--red)">'+inr(ancient)+' · '+pc+'%</b></div>';
-  return h;
-}
-function screenAgeing(){
-  var recv=DATA.bills.filter(function(b){return b.party_type==="receivable";});
-  var pay=DATA.bills.filter(function(b){return b.party_type==="payable";});
-  var h='<div class="h1">Ageing</div><div class="sub">How old your dues are — current vs ancient.</div>';
-  var unr=ageBuckets(recv).un+ageBuckets(pay).un;
-  if(unr>0) h+='<div class="note">'+unr+' bills had no usable date in the sync, so they\'re shown as current. If the buckets look off, the connector\'s bill-date field needs one tweak — tell me and I\'ll fix it.</div>';
-  h+=ageingCard("Receivables ageing",recv,"var(--green)");
-  h+=ageingCard("Payables ageing",pay,"var(--red)");
+  h+='<div class="card p5"><div class="upph">Net position</div><div class="big" style="color:'+(net>=0?"var(--green)":"var(--red)")+'">'+(net>=0?"+":"−")+inr(Math.abs(net))+'</div><div class="muted" style="font-size:13px">'+(net>=0?"Receivables exceed payables (on paper).":"Payables exceed receivables.")+'</div></div>';
+  h+='<div class="grid2"><div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div><div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div></div>';
+  var n=new Date(),mr=[new Date(n.getFullYear(),n.getMonth(),1),n];
+  var am=achievedMap(mr,ui.basis),tot=0;Object.keys(am.map).forEach(function(k){tot+=am.map[k];});
+  h+='<div class="card p5"><div class="upph">Sales this month · '+(am.netUnavail?"gross":ui.basis)+'</div><div class="big" style="color:var(--blue);font-size:30px">'+inr(tot)+'</div><div class="muted" style="font-size:13px">tap Sales or Targets for detail</div></div>';
   return h;
 }
 
-function salesByCustomer(range){
-  var f=range[0].getTime(), t=range[1].getTime();
-  var map={}, total=0;
-  DATA.vouchers.forEach(function(v){
-    if(String(v.vch_type||"").toLowerCase()!=="sales") return;
-    var d=parseDate(v.date); if(!d) return; var tm=d.getTime(); if(tm<f||tm>t) return;
-    var amt=Math.abs(Number(v.amount)||0); var p=v.party||"(no name)";
-    if(!map[p]) map[p]={party:p,total:0,count:0}; map[p].total+=amt; map[p].count++; total+=amt;
-  });
-  var list=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.total-a.total;});
-  return {list:list,total:total};
-}
-function salesInvoices(party,range){
-  var f=range[0].getTime(), t=range[1].getTime(); var out=[];
-  DATA.vouchers.forEach(function(v){
-    if(String(v.vch_type||"").toLowerCase()!=="sales"||v.party!==party) return;
-    var d=parseDate(v.date); if(!d) return; var tm=d.getTime(); if(tm<f||tm>t) return;
-    out.push({date:d,amount:Math.abs(Number(v.amount)||0),narration:v.narration});
-  });
-  return out.sort(function(a,b){return b.date-a.date;});
-}
-function salesProducts(party,range){
-  // only if sales_lines synced
-  if(!DATA.sales.length) return null;
-  var f=range[0].getTime(), t=range[1].getTime(); var map={};
-  DATA.sales.forEach(function(s){
-    if(s.customer!==party) return; var d=parseDate(s.date_iso); if(!d)return; var tm=d.getTime(); if(tm<f||tm>t)return;
-    var key=(s.description||s.item||"(item)");
-    if(!map[key])map[key]={name:key,qty:0,amount:0,unit:s.unit||""}; map[key].qty+=Number(s.qty)||0; map[key].amount+=Number(s.amount)||0;
-  });
-  return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.amount-a.amount;});
-}
+function ageBuckets(list){var b=[0,0,0,0],un=0;list.forEach(function(x){var od=Number(x.overdue_days)||0;if(!od){var d=parseDate(x.bill_date)||parseDate(x.due_date);od=d?Math.floor((Date.now()-d.getTime())/864e5):-1;}var amt=Math.abs(Number(x.amount)||0);if(od<0){un++;b[0]+=amt;}else if(od<=30)b[0]+=amt;else if(od<=60)b[1]+=amt;else if(od<=90)b[2]+=amt;else b[3]+=amt;});return{b:b,un:un};}
+function ageingCard(title,list){var r=ageBuckets(list),tot=r.b.reduce(function(a,c){return a+c;},0);var labels=["0–30d","31–60d","61–90d","90+d"],cols=["#34C759","#FFCC00","#FF9500","#FF3B30"];var h='<div class="card p5"><div class="upph">'+title+'</div>';if(tot<=0){h+='<div class="muted" style="margin-top:8px">No bills.</div></div>';return h;}h+='<div class="bar">';r.b.forEach(function(v,i){var p=v/tot*100;if(p>0)h+='<i style="width:'+p+'%;background:'+cols[i]+'"></i>';});h+='</div><div class="legend">';labels.forEach(function(l,i){h+='<span><span class="dot" style="background:'+cols[i]+'"></span>'+l+' · '+inr(r.b[i])+'</span>';});h+='</div>';var pc=tot>0?Math.round(r.b[3]/tot*100):0;h+='<div class="row" style="padding-left:0;padding-right:0;margin-top:12px;border-top:.5px solid var(--sep)"><span class="grow muted">90+ days (old/paper)</span><b style="color:var(--red)">'+inr(r.b[3])+' · '+pc+'%</b></div>';return h;}
+function screenAgeing(){var recv=DATA.bills.filter(function(b){return b.party_type==="receivable";});var pay=DATA.bills.filter(function(b){return b.party_type==="payable";});var h='<div class="h1">Ageing</div><div class="sub">How old your dues are.</div>';var un=ageBuckets(recv).un+ageBuckets(pay).un;if(un>0)h+='<div class="note">'+un+' bills had no usable date in the sync, so they\'re counted as current. If the split looks off, the connector\'s bill-date field needs one tweak — tell me.</div>';h+=ageingCard("Receivables ageing",recv)+ageingCard("Payables ageing",pay);return h;}
+
+function salesInvoices(party,range){var f=range[0].getTime(),t=range[1].getTime(),out=[];DATA.vouchers.forEach(function(v){if(String(v.vch_type||"").toLowerCase()!=="sales"||v.party!==party)return;var d=parseDate(v.date);if(!d)return;var tm=d.getTime();if(tm<f||tm>t)return;out.push({date:d,amount:Math.abs(Number(v.amount)||0),narration:v.narration});});return out.sort(function(a,b){return b.date-a.date;});}
+function salesProducts(party,range){if(!DATA.sales.length)return null;var f=range[0].getTime(),t=range[1].getTime(),map={};DATA.sales.forEach(function(s){if(s.customer!==party)return;var d=parseDate(s.date_iso);if(!d)return;var tm=d.getTime();if(tm<f||tm>t)return;var key=(s.description||s.item||"(item)");if(!map[key])map[key]={name:key,qty:0,amount:0,unit:s.unit||""};map[key].qty+=Number(s.qty)||0;map[key].amount+=Number(s.amount)||0;});return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.amount-a.amount;});}
 
 function screenSales(){
   var range=periodRange();
   var h='<div class="h1">Sales</div>';
-  h+='<div class="seg">'+["month","quarter","6m","year","custom"].map(function(p){
-    return '<button class="'+(ui.period===p?"on":"")+'" data-act="period" data-v="'+p+'">'+
-      {month:"Month",quarter:"Qtr","6m":"6 mo",year:"Year",custom:"Custom"}[p]+'</button>';}).join("")+'</div>';
-  if(ui.period==="custom"){
-    h+='<div class="datey"><input type="date" id="cf" value="'+esc(ui.custFrom)+'" data-act="cf"><input type="date" id="ct" value="'+esc(ui.custTo)+'" data-act="ct"></div>';
-  }
+  h+='<div class="seg">'+["month","quarter","6m","year","custom"].map(function(p){return '<button class="'+(ui.period===p?"on":"")+'" data-act="period" data-v="'+p+'">'+{month:"Month",quarter:"Qtr","6m":"6 mo",year:"Year",custom:"Custom"}[p]+'</button>';}).join("")+'</div>';
+  h+=basisToggle();
+  if(ui.period==="custom")h+='<div class="datey"><input type="date" value="'+esc(ui.custFrom)+'" data-act="cf"><input type="date" value="'+esc(ui.custTo)+'" data-act="ct"></div>';
+  var am=achievedMap(range,ui.basis);
+  if(am.netUnavail)h+='<div class="note">Showing <b>gross</b> (voucher totals incl. GST). Net (excl. GST) activates once the sales-line sync runs on the accounts PC.</div>';
   if(ui.openCust){
-    var inv=salesInvoices(ui.openCust,range);
-    var prods=salesProducts(ui.openCust,range);
+    var inv=salesInvoices(ui.openCust,range),prods=salesProducts(ui.openCust,range);
     h+='<button class="back" data-act="closecust">‹ All customers</button>';
-    h+='<div class="card p4"><div style="font-size:17px;font-weight:600">'+esc(ui.openCust)+'</div><div class="muted" style="font-size:13px">'+periodLabel()+' · '+inr(inv.reduce(function(t,x){return t+x.amount;},0))+' over '+inv.length+' invoices</div></div>';
-    if(prods){
-      h+='<div class="upph" style="margin:4px 2px 8px">Product-wise (qty × value)</div><div class="card p0">';
-      if(!prods.length) h+='<div class="p4 muted">No product lines in this period.</div>';
-      prods.forEach(function(p){ h+='<div class="row"><div class="grow"><div class="trunc" style="font-weight:500">'+esc(p.name)+'</div><div class="muted" style="font-size:12px">'+(p.qty.toLocaleString("en-IN"))+' '+esc(p.unit)+'</div></div><b>'+inr(p.amount)+'</b></div>'; });
-      h+='</div>';
-    } else {
-      h+='<div class="note">Product-wise breakdown will appear here once the sales-line sync is run on the accounts PC. Below are the invoices for now.</div>';
-    }
-    h+='<div class="upph" style="margin:14px 2px 8px">Invoices</div><div class="card p0">';
-    if(!inv.length)h+='<div class="p4 muted">No sales in this period.</div>';
-    inv.forEach(function(x){ h+='<div class="row"><div class="grow"><div style="font-weight:500">'+dlabel(x.date)+'</div>'+(x.narration?'<div class="muted trunc" style="font-size:12px">'+esc(x.narration)+'</div>':'')+'</div><b>'+inr(x.amount)+'</b></div>'; });
-    h+='</div>';
-    return h;
+    h+='<div class="card p4"><div style="font-size:17px;font-weight:600">'+esc(ui.openCust)+'</div><div class="muted" style="font-size:13px">'+periodLabel()+' · '+inr(am.map[ui.openCust]||0)+' ('+(am.netUnavail?"gross":ui.basis)+')</div></div>';
+    if(prods){h+='<div class="upph" style="margin:4px 2px 8px">Product-wise (qty · value)</div><div class="card p0">';if(!prods.length)h+='<div class="p4 muted">No product lines in this period.</div>';prods.forEach(function(p){h+='<div class="row"><div class="grow"><div class="trunc" style="font-weight:500">'+esc(p.name)+'</div><div class="muted" style="font-size:12px">'+p.qty.toLocaleString("en-IN")+' '+esc(p.unit)+'</div></div><b>'+inr(p.amount)+'</b></div>';});h+='</div>';}
+    else h+='<div class="note">Product-wise breakdown appears here after the sales-line sync. Invoices below.</div>';
+    h+='<div class="upph" style="margin:14px 2px 8px">Invoices (gross)</div><div class="card p0">';if(!inv.length)h+='<div class="p4 muted">No sales in this period.</div>';inv.forEach(function(x){h+='<div class="row"><div class="grow"><div style="font-weight:500">'+dlabel(x.date)+'</div>'+(x.narration?'<div class="muted trunc" style="font-size:12px">'+esc(x.narration)+'</div>':'')+'</div><b>'+inr(x.amount)+'</b></div>';});h+='</div>';return h;
   }
-  var s=salesByCustomer(range);
-  h+='<div class="card p4"><div class="upph">'+periodLabel()+' · total sales</div><div class="big" style="color:var(--blue);font-size:30px;margin:4px 0 0">'+inr(s.total)+'</div><div class="muted" style="font-size:13px">'+s.list.length+' customers</div></div>';
-  if(!s.list.length){h+='<div class="card p4 muted">No sales vouchers in this period.</div>';return h;}
-  h+='<div class="card p0">';
-  s.list.forEach(function(c){ h+='<button class="row" data-act="opencust" data-v="'+esc(c.party)+'"><div class="grow"><div class="trunc" style="font-weight:500">'+esc(c.party)+'</div><div class="muted" style="font-size:12px">'+c.count+' invoice'+(c.count>1?"s":"")+'</div></div><b style="color:var(--blue)">'+inr(c.total)+'</b><span class="chev">›</span></button>'; });
-  h+='</div>';
+  var list=Object.keys(am.map).map(function(k){return{party:k,total:am.map[k]};}).sort(function(a,b){return b.total-a.total;});
+  var tot=list.reduce(function(t,c){return t+c.total;},0);
+  h+='<div class="card p4"><div class="upph">'+periodLabel()+' · total ('+(am.netUnavail?"gross":ui.basis)+')</div><div class="big" style="color:var(--blue);font-size:30px;margin:4px 0 0">'+inr(tot)+'</div><div class="muted" style="font-size:13px">'+list.length+' customers</div></div>';
+  if(!list.length){h+='<div class="card p4 muted">No sales in this period.</div>';return h;}
+  h+='<div class="card p0">';list.forEach(function(c){h+='<button class="row" data-act="opencust" data-v="'+esc(c.party)+'"><div class="grow trunc" style="font-weight:500">'+esc(c.party)+'</div><b style="color:var(--blue)">'+inr(c.total)+'</b><span class="chev">›</span></button>';});h+='</div>';
   return h;
 }
 
-function screenBalances(){
-  var grp={}; var gmap={};
-  DATA.ledgers.forEach(function(l){gmap[l.name]=l.parent_group||"(ungrouped)";});
-  DATA.trial.forEach(function(t){
-    var g=gmap[t.ledger]||"(ungrouped)";
-    var net=(Number(t.closing_dr)||0)-(Number(t.closing_cr)||0);
-    if(!grp[g])grp[g]={group:g,net:0,n:0}; grp[g].net+=net; grp[g].n++;
+function screenTargets(){
+  var range=monthRange(ui.tmonth);
+  var am=achievedMap(range,ui.basis);
+  // customers = those with a target this month, or with sales this month
+  var names={};
+  DATA.targets.forEach(function(t){if(t.month===ui.tmonth)names[t.customer]=true;});
+  Object.keys(am.map).forEach(function(k){names[k]=true;});
+  var rows=Object.keys(names).map(function(name){
+    var tRow=DATA.targets.filter(function(x){return x.month===ui.tmonth&&x.customer===name;})[0];
+    return {name:name,tier:tierOf(name),target:tRow?Number(tRow.target_lakhs)||0:0,ach:toL(am.map[name]||0)};
   });
-  var list=Object.keys(grp).map(function(k){return grp[k];}).sort(function(a,b){return Math.abs(b.net)-Math.abs(a.net);});
-  var h='<div class="h1">Balances</div><div class="sub">Closing balances grouped by Tally group. Dr positive, Cr negative.</div>';
-  h+='<div class="card p0">';
-  list.forEach(function(g){ h+='<div class="row"><div class="grow trunc">'+esc(g.group)+'<div class="muted" style="font-size:12px">'+g.n+' ledgers</div></div><b style="color:'+(g.net>=0?"var(--label)":"var(--red)")+'">'+inr(g.net)+'</b></div>'; });
-  h+='</div><div class="muted" style="font-size:12px;margin-top:10px;text-align:center">Formal P&amp;L grouping (income vs expense) can be layered on next.</div>';
+  function section(tier,title){
+    var items=rows.filter(function(r){return r.tier===tier;}).sort(function(a,b){return b.ach-a.ach;});
+    var st=items.reduce(function(s,r){return s+r.target;},0),sa=items.reduce(function(s,r){return s+r.ach;},0);
+    var h='<div class="secthead"><span class="upph">'+title+'</span><span class="muted" style="font-size:12px">T '+lk(st)+' · A '+lk(sa)+'</span></div><div class="card p0" style="margin-bottom:16px">';
+    h+='<div style="display:flex;padding:8px 14px;background:#FBFBFD;font-size:11px;font-weight:600;color:var(--label2)"><span class="grow">CUSTOMER</span><span style="width:64px;text-align:right">TARGET</span><span style="width:70px;text-align:right">ACHIEVED</span></div>';
+    if(!items.length)h+='<div class="p4 muted" style="font-size:13px">None yet.</div>';
+    items.forEach(function(r){
+      var pct=r.target>0?Math.round(r.ach/r.target*100):0;
+      h+='<div style="padding:9px 14px;border-top:.5px solid var(--sep)"><div style="display:flex;align-items:center;gap:8px">';
+      h+='<button class="chip '+(r.tier==="P"?"chipP":"chipS")+'" data-act="tier" data-v="'+esc(r.name)+'">'+r.tier+'</button>';
+      h+='<span class="grow trunc" style="font-size:14px">'+esc(r.name)+'</span>';
+      h+='<input class="tinput" type="number" inputmode="decimal" value="'+(r.target?r.target:"")+'" placeholder="0" data-act="tgt" data-v="'+esc(r.name)+'">';
+      h+='<span style="width:70px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:var(--blue)">'+lk(r.ach)+'</span></div>';
+      if(r.target>0)h+='<div class="bar" style="height:4px;margin-top:6px"><i style="width:'+Math.min(100,pct)+'%;background:'+pctColor(pct)+'"></i></div>';
+      h+='</div>';
+    });
+    h+='</div>';return h;
+  }
+  var grandT=rows.reduce(function(s,r){return s+r.target;},0),grandA=rows.reduce(function(s,r){return s+r.ach;},0);
+  var gp=grandT>0?Math.round(grandA/grandT*100):0;
+  var h='<div class="h1">Targets</div>';
+  h+='<div class="datey"><input type="month" value="'+ui.tmonth+'" data-act="tmonth" style="flex:1"></div>';
+  h+=basisToggle();
+  if(am.netUnavail)h+='<div class="note">Achieved is <b>gross</b> for now (incl. GST). It switches to <b>net</b> automatically after the sales-line sync. Targets are in ₹ lakhs.</div>';
+  h+='<div class="card p4" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="upph">'+monthLabel(ui.tmonth)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+gp+'% of target</div></div><div style="display:flex;gap:20px;text-align:right"><div><div style="font-size:11px;color:var(--label2)">Target</div><div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">'+lk(grandT)+'</div></div><div><div style="font-size:11px;color:var(--label2)">Achieved</div><div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--blue)">'+lk(grandA)+'</div></div></div></div><div class="bar" style="margin-top:12px"><i style="width:'+Math.min(100,gp)+'%;background:'+pctColor(gp)+'"></i></div></div>';
+  h+=section("P","Primary Customer")+section("S","Secondary Customer");
+  h+='<div class="muted" style="font-size:12px;text-align:center">Tap the P/S chip to move a customer between Primary and Secondary. Type a target to set it — saved automatically. New customers with sales appear at target 0.</div>';
   return h;
 }
+
+function screenBalances(){var grp={},gmap={};DATA.ledgers.forEach(function(l){gmap[l.name]=l.parent_group||"(ungrouped)";});DATA.trial.forEach(function(t){var g=gmap[t.ledger]||"(ungrouped)";var net=(Number(t.closing_dr)||0)-(Number(t.closing_cr)||0);if(!grp[g])grp[g]={group:g,net:0,n:0};grp[g].net+=net;grp[g].n++;});var list=Object.keys(grp).map(function(k){return grp[k];}).sort(function(a,b){return Math.abs(b.net)-Math.abs(a.net);});var h='<div class="h1">Balances</div><div class="sub">Closing balances by Tally group. Dr +, Cr −.</div><div class="card p0">';list.forEach(function(g){h+='<div class="row"><div class="grow trunc">'+esc(g.group)+'<div class="muted" style="font-size:12px">'+g.n+' ledgers</div></div><b style="color:'+(g.net>=0?"var(--label)":"var(--red)")+'">'+inr(g.net)+'</b></div>';});h+='</div>';return h;}
 
 function render(){
   var h;
-  if(ui.tab==="home")h=screenHome();
-  else if(ui.tab==="ageing")h=screenAgeing();
-  else if(ui.tab==="sales")h=screenSales();
-  else h=screenBalances();
+  if(ui.tab==="home")h=screenHome();else if(ui.tab==="sales")h=screenSales();
+  else if(ui.tab==="targets")h=screenTargets();else if(ui.tab==="ageing")h=screenAgeing();else h=screenBalances();
   document.getElementById("app").innerHTML=h;
-  var sub=document.getElementById("sub");
-  if(sub){ var as=DATA.lastSync?new Date(DATA.lastSync).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}):"unknown"; sub.innerHTML='Live from Tally · as of <b>'+esc(as)+'</b>'; }
-  var tabs=[["home","Home"],["ageing","Ageing"],["sales","Sales"],["balances","Balances"]];
+  var sub=document.getElementById("sub");if(sub){var as=DATA.lastSync?new Date(DATA.lastSync).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}):"unknown";sub.innerHTML='Live from Tally · as of <b>'+esc(as)+'</b>';}
+  var tabs=[["home","Home"],["sales","Sales"],["targets","Targets"],["ageing","Ageing"],["balances","Balances"]];
   document.getElementById("tabbar").innerHTML=tabs.map(function(t){return '<button class="'+(ui.tab===t[0]?"on":"")+'" data-act="tab" data-v="'+t[0]+'"><span>'+t[1]+'</span></button>';}).join("");
 }
 
-document.addEventListener("click",function(ev){
-  var t=ev.target.closest("[data-act]"); if(!t)return;
-  var a=t.getAttribute("data-act"), v=t.getAttribute("data-v");
+document.addEventListener("click",function(ev){var t=ev.target.closest("[data-act]");if(!t)return;var a=t.getAttribute("data-act"),v=t.getAttribute("data-v");
   if(a==="tab"){ui.tab=v;ui.openCust=null;window.scrollTo(0,0);render();}
   else if(a==="period"){ui.period=v;ui.openCust=null;render();}
+  else if(a==="basis"){ui.basis=v;render();}
   else if(a==="opencust"){ui.openCust=v;window.scrollTo(0,0);render();}
   else if(a==="closecust"){ui.openCust=null;window.scrollTo(0,0);render();}
+  else if(a==="tier"){var cur=tierOf(v),nx=(cur==="P"?"S":"P");DATA.tiers[v]=nx;render();sbWrite("assumptions",{key:"tier:"+v,value:(nx==="P"?1:2),note:v},"key").then(function(){toast("Saved");}).catch(function(){toast("Save failed");});}
 });
-document.addEventListener("change",function(ev){
-  var t=ev.target,a=t.getAttribute&&t.getAttribute("data-act"); if(!a)return;
-  if(a==="cf"){ui.custFrom=t.value;render();} else if(a==="ct"){ui.custTo=t.value;render();}
+document.addEventListener("change",function(ev){var t=ev.target,a=t.getAttribute&&t.getAttribute("data-act");if(!a)return;var v=t.getAttribute("data-v");
+  if(a==="cf"){ui.custFrom=t.value;render();}
+  else if(a==="ct"){ui.custTo=t.value;render();}
+  else if(a==="tmonth"){ui.tmonth=t.value||curMonth();render();}
+  else if(a==="tgt"){
+    var val=parseFloat(t.value)||0,id=ui.tmonth+"|"+v;
+    var ex=DATA.targets.filter(function(x){return x.id===id;})[0];
+    if(ex)ex.target_lakhs=val;else DATA.targets.push({id:id,month:ui.tmonth,customer:v,target_lakhs:val});
+    sbWrite("sales_targets",{id:id,month:ui.tmonth,customer:v,target_lakhs:val},"id").then(function(){toast("Target saved");render();}).catch(function(){toast("Save failed");});
+  }
 });
-
 load();
 </script>
 </body>
