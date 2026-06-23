@@ -139,7 +139,7 @@ function periodRange(){var now=new Date(),y=now.getFullYear(),mo=now.getMonth();
   if(ui.period==="custom"){var f=ui.custFrom?new Date(ui.custFrom):new Date(y,mo,1),t=ui.custTo?new Date(ui.custTo+"T23:59"):now;return[f,t];}
   return[new Date(y,mo,1),now];}
 function periodLabel(){return{month:"This month",quarter:"This quarter","6m":"Last 6 months",year:"This FY",custom:"Custom"}[ui.period];}
-function basisToggle(){return '<div class="seg" style="max-width:240px"><button class="'+(ui.basis==="net"?"on":"")+'" data-act="basis" data-v="net">Net (no GST)</button><button class="'+(ui.basis==="gross"?"on":"")+'" data-act="basis" data-v="gross">Gross</button></div>';}
+function basisToggle(){return '<div class="seg" style="max-width:300px"><button class="'+(ui.basis==="net"?"on":"")+'" data-act="basis" data-v="net">Net (Excl. GST)</button><button class="'+(ui.basis==="gross"?"on":"")+'" data-act="basis" data-v="gross">Gross (Incl. GST)</button></div>';}
 
 // ---------- screens ----------
 function screenHome(){
@@ -152,7 +152,19 @@ function screenHome(){
   h+='<div class="grid2"><div class="tile"><div class="t">To collect</div><div class="v" style="color:var(--green)">'+inr(totR)+'</div><div class="s">'+recv.length+' bills</div></div><div class="tile"><div class="t">To pay</div><div class="v" style="color:var(--red)">'+inr(totP)+'</div><div class="s">'+pay.length+' bills</div></div></div>';
   var n=new Date(),mr=[new Date(n.getFullYear(),n.getMonth(),1),n];
   var am=achievedMap(mr,ui.basis),tot=0;Object.keys(am.map).forEach(function(k){tot+=am.map[k];});
-  h+='<div class="card p5"><div class="upph">Sales this month · '+(am.netUnavail?"gross":ui.basis)+'</div><div class="big" style="color:var(--blue);font-size:30px">'+inr(tot)+'</div><div class="muted" style="font-size:13px">tap Sales or Targets for detail</div></div>';
+  // Target vs Achieved dashboard (this month)
+  var tm=curMonth();
+  var monTargets=DATA.targets.filter(function(t){return t.month===tm;});
+  var tgtTotal=monTargets.reduce(function(s,t){return s+(Number(t.target_lakhs)||0);},0);
+  var achTotal=toL(tot);
+  var gp=tgtTotal>0?Math.round(achTotal/tgtTotal*100):0;
+  h+='<button class="card p5" data-act="tab" data-v="targets" style="display:block;width:100%;text-align:left;border:none;cursor:pointer">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center"><span class="upph">Target vs achieved · '+monthLabel(tm)+'</span><span class="chev">›</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-end;margin:10px 0 4px"><div><div style="font-size:11px;color:var(--label2)">Target (₹L)</div><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">'+lk(tgtTotal)+'</div></div>';
+  h+='<div style="text-align:center"><div style="font-size:11px;color:var(--label2)">Achieved</div><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--blue)">'+lk(achTotal)+'</div></div>';
+  h+='<div style="text-align:right"><div style="font-size:11px;color:var(--label2)">%</div><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;color:'+pctColor(gp)+'">'+gp+'%</div></div></div>';
+  h+='<div class="bar"><i style="width:'+Math.min(100,gp)+'%;background:'+pctColor(gp)+'"></i></div>';
+  h+='<div class="muted" style="font-size:12px;margin-top:8px">'+(am.netUnavail?"Achieved shown gross (incl. GST) — net activates after sales-line sync. ":"")+'Tap for full customer detail.</div></button>';
   return h;
 }
 
